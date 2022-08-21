@@ -10,6 +10,8 @@ use rocket::Request;
 use rocket::http::Status;
 use randua;
 use rand::{Rng, SeedableRng};
+use log::{debug, error, info, warn};
+use env_logger;
 
 // Proxy List
 
@@ -53,6 +55,8 @@ fn home() -> String {
 
 #[get("/<word>/<max>")]
 async fn gen(word: String, max: usize) -> String {
+
+    env_logger::init();
     
     let output_vector: Arc<RwLock<Vec<String>>> = Arc::new(RwLock::new(vec![]));
     let mut new_items: Vec<String> = vec![];
