@@ -98,7 +98,7 @@ async fn gen(word: String, max: usize) -> String {
                         match response.text().await {
                             Ok(text) => {
                                 let value: Value = serde_json::from_str(&text).expect("! Problem reading bing response");
-                                let items: Vec<String> = serde_json::from_value(value[1].to_owned()).expect("! This is a critical error code: 1-B");
+                                let items: Vec<String> = serde_json::from_value(value[1].to_owned()).expect("! Bing changed their JSON response");
                                 items.into_iter().for_each(|item| {
                                     if ! output_vector.read().expect("! Lock is already taken").contains(&item) {
                                         output_vector.write().expect("! Lock is already taken").push(item.clone());
@@ -120,6 +120,37 @@ async fn gen(word: String, max: usize) -> String {
             }
 
 
+            // Yep Scraping
+
+            let yep_url: String = format!("https://api.yep.com/ac/?query={}", kword);
+
+            match client.get(&yep_url).send().await {
+                Ok(response) => {
+                    if response.status() == reqwest::StatusCode::OK {
+                        match response.text().await {
+                            Ok(text) => {
+                                let value: Value = serde_json::from_str(&text).expect("! Problem reading yep response");
+                                let items: Vec<String> = serde_json::from_value(value[1].to_owned()).expect("! yep changed their JSON response");
+                                items.into_iter().for_each(|item| {
+                                    if ! output_vector.read().expect("! Lock is already taken").contains(&item) {
+                                        output_vector.write().expect("! Lock is already taken").push(item.clone());
+                                    }
+                                    if ! new_items.contains(&item) {
+                                        new_items.push(item);
+                                    }
+                                })
+                            }
+                            Err(_) => println!("! Could not read yep response json ")
+                        }
+                    }
+                }
+                Err(_) => println!("! Yep request Error")
+            }
+
+            if output_vector.read().expect("! Lock is already taken").len() >= max {
+                break;
+            }
+
             // Ask.com Scraping
 
             let ask_url: String = format!("https://amg-ss.ask.com/query?lang=en-US&limit=20&q={}", kword);
@@ -130,7 +161,7 @@ async fn gen(word: String, max: usize) -> String {
                         match response.text().await {
                             Ok(text) => {
                                 let value: Value = serde_json::from_str(&text).expect("! Problem reading ask.com response");
-                                let items: Vec<String> = serde_json::from_value(value[1].to_owned()).expect("! This is a critical error code: 1-C");
+                                let items: Vec<String> = serde_json::from_value(value[1].to_owned()).expect("! Ask.com changed their JSON response");
                                 items.into_iter().for_each(|item| {
                                     if ! output_vector.read().expect("! Lock is already taken").contains(&item) {
                                         output_vector.write().expect("! Lock is already taken").push(item.clone());
@@ -153,15 +184,15 @@ async fn gen(word: String, max: usize) -> String {
 
             // Neeva.com Scraping
 
-            let ask_url: String = format!("https://neeva.com/suggest?q={}", kword);
+            let neeva_url: String = format!("https://neeva.com/suggest?q={}", kword);
 
-            match client.get(&ask_url).send().await {
+            match client.get(&neeva_url).send().await {
                 Ok(response) => {
                     if response.status() == reqwest::StatusCode::OK {
                         match response.text().await {
                             Ok(text) => {
                                 let value: Value = serde_json::from_str(&text).expect("! Problem reading neeva response");
-                                let items: Vec<String> = serde_json::from_value(value[1].to_owned()).expect("! This is a critical error code: 1-C");
+                                let items: Vec<String> = serde_json::from_value(value[1].to_owned()).expect("! Neeva changed their JSON response");
                                 items.into_iter().for_each(|item| {
                                     if ! output_vector.read().expect("! Lock is already taken").contains(&item) {
                                         output_vector.write().expect("! Lock is already taken").push(item.clone());
