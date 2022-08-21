@@ -3,6 +3,7 @@ google: http://suggestqueries.google.com/complete/search?client=firefox&q={WORD}
 bing: https://api.bing.com/osjson.aspx?query={WORD}
 ask: https://amg-ss.ask.com/query?lang=en-US&limit=20&q={WORD}
 neeva: https://neeva.com/suggest?q={WORD}
+yep: https://api.yep.com/ac/?query={WORD}
 
 To be added:
 seznam: https://suggest.seznam.cz/fulltext/cs?phrase={WORD}&count=100
@@ -19,4 +20,3 @@ ecosia: https://ac.ecosia.org/?q={WORD}&mkt=en-us
 wolframalpha: https://www.wolframalpha.com/n/v1/api/autocomplete/?i={WORD}
 qwant: https://api.qwant.com/v3/suggest?q={WORD}
 you: https://you.com/api/ac?q={WORD}
-yep: https://api.yep.com/ac/?query={WORD}
