@@ -1,0 +1,7 @@
+1. Add randomized proxies - DONE
+2. Add multithreading
+3. Add more proxy sources (goal: 10)
+4. Add more engines (goal: 50)
+5. Add synonyms
+6. Add optional arguments
+7. Add auth

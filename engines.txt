@@ -1,0 +1,19 @@
+Added:
+google: http://suggestqueries.google.com/complete/search?client=firefox&q={WORD} -REMOVED
+bing: https://api.bing.com/osjson.aspx?query={WORD}
+ask: https://amg-ss.ask.com/query?lang=en-US&limit=20&q={WORD}
+neeva: https://neeva.com/suggest?q={WORD}
+
+To be added:
+seznam: https://suggest.seznam.cz/fulltext/cs?phrase={WORD}&count=100
+duckduckgo: https://duckduckgo.com/ac/?q={WORD}
+yahoo: https://search.yahoo.com/sugg/gossip/gossip-us-fastbreak/?pq=&command={WORD}&output=sd1&nresults=20
+etsy: https://www.etsy.com/suggestions_ajax.php?search_query={WORD}
+ebay: https://www.ebay.com/autosug?kwd={WORD}&sId=0&callback=0
+yandex: https://yandex.com/suggest/suggest-ya.cgi?n=100&part={WORD}
+naver: https://ac.search.naver.com/nx/ac?q={WORD}&st=100
+AOL: https://search.aol.com/sugg/gossip/gossip-us-ura/?command={WORD}&output=sd1
+amazon: https://completion.amazon.com/api/2017/suggestions?limit=11&prefix={WORD}&alias=aps&mid=ATVPDKIKX0DER
+swisscows: https://swisscows.com/api/suggest?query={WORD}&region=en-US&itemsCount=20
+ecosia: https://ac.ecosia.org/?q={WORD}&mkt=en-us
+wolframalpha: https://www.wolframalpha.com/n/v1/api/autocomplete/?i={WORD}
