@@ -4,8 +4,7 @@ bing: https://api.bing.com/osjson.aspx?query={WORD}
 ask: https://amg-ss.ask.com/query?lang=en-US&limit=20&q={WORD}
 neeva: https://neeva.com/suggest?q={WORD}
 yep: https://api.yep.com/ac/?query={WORD}
-
-To be added:
+-----started from here-----------
 seznam: https://suggest.seznam.cz/fulltext/cs?phrase={WORD}&count=100
 duckduckgo: https://duckduckgo.com/ac/?q={WORD}
 yahoo: https://search.yahoo.com/sugg/gossip/gossip-us-fastbreak/?pq=&command={WORD}&output=sd1&nresults=20
@@ -17,6 +16,8 @@ AOL: https://search.aol.com/sugg/gossip/gossip-us-ura/?command={WORD}&output=sd1
 amazon: https://completion.amazon.com/api/2017/suggestions?limit=11&prefix={WORD}&alias=aps&mid=ATVPDKIKX0DER
 swisscows: https://swisscows.com/api/suggest?query={WORD}&region=en-US&itemsCount=20
 ecosia: https://ac.ecosia.org/?q={WORD}&mkt=en-us
+
 wolframalpha: https://www.wolframalpha.com/n/v1/api/autocomplete/?i={WORD}
 qwant: https://api.qwant.com/v3/suggest?q={WORD}
+To be added:
 you: https://you.com/api/ac?q={WORD}
