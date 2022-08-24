@@ -61,27 +61,7 @@ fn home() -> String {
 
 #[get("/<word>/<max>")]
 async fn gen(word: String, max: usize) -> String {
-    let engine_entries:Vec<&(dyn Fn(Client,Arc<Mutex<String>>,Arc<Mutex<Vec<String>>>,Arc<Mutex<Vec<String>>>,Arc<Mutex<u8>>)+ Sync)> = vec![
-                &engines::bing,
-                &engines::bing,
-                &engines::yep,
-                &engines::ask,
-                &engines::neeva,
-                &engines::seznam,
-                &engines::duckduckgo,
-                &engines::yahoo,
-                &engines::etsy,
-                &engines::ebay,
-                &engines::yandex,
-                &engines::naver,
-                &engines::aol,
-                &engines::amazon,
-                &engines::swisscows,
-                &engines::ecosia,
-                &engines::wolframalpha,
-                &engines::qwant,
-                &engines::you,
-];
+
 
     // with this enabled my server always crashes err 500 env_logger::init();
     
@@ -115,7 +95,7 @@ async fn gen(word: String, max: usize) -> String {
             
             
 
-            for  engine  in engine_entries.clone(){
+            for  engine  in engines::ENGINES.clone(){
                 if output_vector.lock().expect("! Lock is already taken").len() >= max {
                     break;
                 }
@@ -147,7 +127,7 @@ async fn gen(word: String, max: usize) -> String {
                 .build()
                 .expect("! could not build");
                     
-                    engine.lock().unwrap()(client,kword,output_vector,new_items,THREAD_COUNT.clone());
+                    engine.lock().unwrap()(client,kword,output_vector,new_items);
                     *THREAD_COUNT.lock().unwrap()-=1;
                     
                     println!("thread closed currently runing  {}",*THREAD_COUNT.lock().unwrap());

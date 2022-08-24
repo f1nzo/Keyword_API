@@ -13,7 +13,7 @@ use rand::{Rng, SeedableRng};
 use log::{debug, error, info, warn};
 use env_logger;
 
-  pub fn bing(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<String>>>,new_items:Arc<Mutex<Vec<String>>>,thread_count:Arc<Mutex<u8>>){
+  pub fn bing(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<String>>>,new_items:Arc<Mutex<Vec<String>>>){
     let kword =  kword.lock().unwrap();
     let mut  new_items =new_items.lock().unwrap();
  
@@ -53,7 +53,7 @@ use env_logger;
 
 // ======================================================================================================================
 
- pub fn yep(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<String>>>,new_items:Arc<Mutex<Vec<String>>>,thread_count:Arc<Mutex<u8>>){
+ pub fn yep(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<String>>>,new_items:Arc<Mutex<Vec<String>>>){
     let kword =  kword.lock().unwrap();
     let mut  new_items =new_items.lock().unwrap();
 
@@ -101,7 +101,7 @@ use env_logger;
 
 // ======================================================================================================================
 
-pub fn ask(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<String>>>,new_items:Arc<Mutex<Vec<String>>>,thread_count:Arc<Mutex<u8>>){
+pub fn ask(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<String>>>,new_items:Arc<Mutex<Vec<String>>>){
     let kword =  kword.lock().unwrap();
     let mut  new_items =new_items.lock().unwrap();
 let ask_url: String = format!("https://amg-ss.ask.com/query?lang=en-US&limit=20&q={}", kword);
@@ -145,7 +145,7 @@ let ask_url: String = format!("https://amg-ss.ask.com/query?lang=en-US&limit=20&
 // ======================================================================================================================
 
 
-    pub fn neeva(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<String>>>,new_items:Arc<Mutex<Vec<String>>>,thread_count:Arc<Mutex<u8>>){
+    pub fn neeva(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<String>>>,new_items:Arc<Mutex<Vec<String>>>){
     let kword =  kword.lock().unwrap();
     let mut  new_items =new_items.lock().unwrap();
      let neeva_url: String = format!("https://neeva.com/suggest?q={}", kword);
@@ -177,7 +177,7 @@ let ask_url: String = format!("https://amg-ss.ask.com/query?lang=en-US&limit=20&
 
 
 // ======================================================================================================================
-pub fn seznam(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<String>>>,new_items:Arc<Mutex<Vec<String>>>,thread_count:Arc<Mutex<u8>>){
+pub fn seznam(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<String>>>,new_items:Arc<Mutex<Vec<String>>>){
     let kword =  kword.lock().unwrap();
     let mut  new_items =new_items.lock().unwrap();
      let seznam_url: String = format!("https://suggest.seznam.cz/fulltext/cs?phrase={}&count=100", kword);
@@ -219,7 +219,7 @@ pub fn seznam(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec
 
 
 // ======================================================================================================================
-pub fn duckduckgo(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<String>>>,new_items:Arc<Mutex<Vec<String>>>,thread_count:Arc<Mutex<u8>>){
+pub fn duckduckgo(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<String>>>,new_items:Arc<Mutex<Vec<String>>>){
     let kword =  kword.lock().unwrap();
     let mut  new_items =new_items.lock().unwrap();
 
@@ -274,7 +274,7 @@ pub fn duckduckgo(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex
   
 
 
-pub fn yahoo(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<String>>>,new_items:Arc<Mutex<Vec<String>>>,thread_count:Arc<Mutex<u8>>){
+pub fn yahoo(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<String>>>,new_items:Arc<Mutex<Vec<String>>>){
     let kword =  kword.lock().unwrap();
     let mut  new_items =new_items.lock().unwrap();
        // yahoo scraping
@@ -313,7 +313,7 @@ pub fn yahoo(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<
 
 }
 // ======================================================================================================================
-pub fn etsy(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<String>>>,new_items:Arc<Mutex<Vec<String>>>,thread_count:Arc<Mutex<u8>>){
+pub fn etsy(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<String>>>,new_items:Arc<Mutex<Vec<String>>>){
     let kword =  kword.lock().unwrap();
     let mut  new_items =new_items.lock().unwrap();
        
@@ -358,7 +358,7 @@ pub fn etsy(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<S
 
 // ======================================================================================================================        
         // ebay scraping
-pub fn ebay(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<String>>>,new_items:Arc<Mutex<Vec<String>>>,thread_count:Arc<Mutex<u8>>){
+pub fn ebay(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<String>>>,new_items:Arc<Mutex<Vec<String>>>){
     let kword =  kword.lock().unwrap();
     let mut  new_items =new_items.lock().unwrap();
         let ebay_url: String = format!("https://www.ebay.com/autosug?kwd={}&sId=0&callback=0", kword);
@@ -396,7 +396,7 @@ pub fn ebay(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<S
 
 // ======================================================================================================================
      // yandex Scraping
- pub fn yandex(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<String>>>,new_items:Arc<Mutex<Vec<String>>>,thread_count:Arc<Mutex<u8>>){
+ pub fn yandex(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<String>>>,new_items:Arc<Mutex<Vec<String>>>){
     let kword =  kword.lock().unwrap();
     let mut  new_items =new_items.lock().unwrap();
 
@@ -434,7 +434,7 @@ pub fn ebay(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<S
 
 
 // ======================================================================================================================
-pub fn naver(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<String>>>,new_items:Arc<Mutex<Vec<String>>>,thread_count:Arc<Mutex<u8>>){
+pub fn naver(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<String>>>,new_items:Arc<Mutex<Vec<String>>>){
     let kword =  kword.lock().unwrap();
     let mut  new_items =new_items.lock().unwrap();
     // naver Scraping
@@ -471,7 +471,7 @@ pub fn naver(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<
 }
 // ======================================================================================================================
 // ======================================================================================================================
-pub fn aol(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<String>>>,new_items:Arc<Mutex<Vec<String>>>,thread_count:Arc<Mutex<u8>>){
+pub fn aol(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<String>>>,new_items:Arc<Mutex<Vec<String>>>){
     let kword =  kword.lock().unwrap();
     let mut  new_items =new_items.lock().unwrap();
        // aol scraping
@@ -515,7 +515,7 @@ pub fn aol(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<St
 
 
 // ======================================================================================================================
-pub fn amazon(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<String>>>,new_items:Arc<Mutex<Vec<String>>>,thread_count:Arc<Mutex<u8>>){
+pub fn amazon(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<String>>>,new_items:Arc<Mutex<Vec<String>>>){
     let kword =  kword.lock().unwrap();
     let mut  new_items =new_items.lock().unwrap();
 
@@ -556,7 +556,7 @@ pub fn amazon(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec
 
 // ======================================================================================================================
 // ======================================================================================================================
-pub fn swisscows(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<String>>>,new_items:Arc<Mutex<Vec<String>>>,thread_count:Arc<Mutex<u8>>){
+pub fn swisscows(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<String>>>,new_items:Arc<Mutex<Vec<String>>>){
     let kword =  kword.lock().unwrap();
     let mut  new_items =new_items.lock().unwrap();
 
@@ -593,7 +593,7 @@ pub fn swisscows(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<
 
 // ======================================================================================================================
 // ======================================================================================================================
-pub fn ecosia(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<String>>>,new_items:Arc<Mutex<Vec<String>>>,thread_count:Arc<Mutex<u8>>){
+pub fn ecosia(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<String>>>,new_items:Arc<Mutex<Vec<String>>>){
     let kword =  kword.lock().unwrap();
     let mut  new_items =new_items.lock().unwrap();
 
@@ -630,7 +630,7 @@ pub fn ecosia(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec
       
 // ======================================================================================================================
 // ======================================================================================================================
-pub fn wolframalpha(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<String>>>,new_items:Arc<Mutex<Vec<String>>>,thread_count:Arc<Mutex<u8>>){
+pub fn wolframalpha(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<String>>>,new_items:Arc<Mutex<Vec<String>>>){
     let kword =  kword.lock().unwrap();
     let mut  new_items =new_items.lock().unwrap();
 
@@ -672,7 +672,7 @@ pub fn wolframalpha(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mut
 // ======================================================================================================================
 
 // ======================================================================================================================
-pub fn qwant(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<String>>>,new_items:Arc<Mutex<Vec<String>>>,thread_count:Arc<Mutex<u8>>){
+pub fn qwant(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<String>>>,new_items:Arc<Mutex<Vec<String>>>){
     let kword =  kword.lock().unwrap();
     let mut  new_items =new_items.lock().unwrap();
        // qwant scraping
@@ -712,7 +712,7 @@ pub fn qwant(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<
     }
 // ======================================================================================================================
 // ======================================================================================================================
-pub fn you(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<String>>>,new_items:Arc<Mutex<Vec<String>>>,thread_count:Arc<Mutex<u8>>){
+pub fn you(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<String>>>,new_items:Arc<Mutex<Vec<String>>>){
     let kword =  kword.lock().unwrap();
     let mut  new_items =new_items.lock().unwrap();
        // you scraping 
@@ -748,3 +748,27 @@ pub fn you(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<St
       
 }
 // ======================================================================================================================
+
+
+lazy_static!{
+    pub static ref ENGINES:Vec<&'static(dyn Fn(Client,Arc<Mutex<String>>,Arc<Mutex<Vec<String>>>,Arc<Mutex<Vec<String>>>)+ Sync)> = vec![
+                &bing,
+                &bing,
+                &yep,
+                &ask,
+                &neeva,
+                &seznam,
+                &duckduckgo,
+                &yahoo,
+                &etsy,
+                &ebay,
+                &yandex,
+                &naver,
+                &aol,
+                &amazon,
+                &swisscows,
+                &ecosia,
+                &wolframalpha,
+                &qwant,
+                &you,
+];}
