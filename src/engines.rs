@@ -1,17 +1,13 @@
 use std::sync::{Arc,Mutex};
-use std::{thread, time};
-use rand::rngs::StdRng;
+
+
 use reqwest;
 use reqwest::blocking::Client;
 use reqwest::Proxy;
 use serde_json::{self};
 use serde_json::Value;
-use rocket::Request;
-use rocket::http::Status;
-use randua;
-use rand::{Rng, SeedableRng};
-use log::{debug, error, info, warn};
-use env_logger;
+
+
 
   pub fn bing(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<String>>>,new_items:Arc<Mutex<Vec<String>>>){
     let kword =  kword.lock().unwrap();

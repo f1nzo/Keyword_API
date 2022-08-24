@@ -66,7 +66,7 @@ async fn gen(word: String, max: usize) -> String {
     // with this enabled my server always crashes err 500 env_logger::init();
     
     let output_vector: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(vec![]));
-    let mut new_items: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(vec![word]));
+    let  new_items: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(vec![word]));
     
     let mut old_items: Vec<String> = vec![];
 
@@ -113,19 +113,15 @@ async fn gen(word: String, max: usize) -> String {
                 thread::spawn(move||{
                     *THREAD_COUNT.lock().unwrap()+=1;
                     println!("new thread opened currently runing  {}",*THREAD_COUNT.lock().unwrap());
-                    let client:Client = reqwest::blocking::Client::builder()
-                    .user_agent(randua::new().to_string())
-                    .proxy(proxy.clone())
-                    .build()
-                    .expect("! could not build");
+                   
 
                    
                    
                     let client:Client = reqwest::blocking::Client::builder()
-                .user_agent(randua::new().to_string())
-                .proxy(proxy)
-                .build()
-                .expect("! could not build");
+                    .user_agent(randua::new().to_string())
+                    .proxy(proxy)
+                    .build()
+                    .expect("! could not build");
                     
                     engine.lock().unwrap()(client,kword,output_vector,new_items);
                     *THREAD_COUNT.lock().unwrap()-=1;
