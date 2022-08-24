@@ -1,4 +1,4 @@
-use std::sync::{Arc,Mutex};
+use std::sync::{Arc,Mutex,LockResult};
 
  
 use reqwest;
@@ -7,11 +7,26 @@ use reqwest::Proxy;
 use serde_json::{self};
 use serde_json::Value;
 
+pub trait LockResultExt {
+    type Guard;
 
+    /// Returns the lock guard even if the mutex is [poisoned].
+    ///
+    /// [poisoned]: https://doc.rust-lang.org/stable/std/sync/struct.Mutex.html#poisoning
+    fn ignore_poison(self) -> Self::Guard;
+}
+
+impl<Guard> LockResultExt for LockResult<Guard> {
+    type Guard = Guard;
+
+    fn ignore_poison(self) -> Guard {
+        self.unwrap_or_else(|e| e.into_inner())
+    }
+}
 
   pub fn bing(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<String>>>,new_items:Arc<Mutex<Vec<String>>>){
-    let kword =  kword.lock().unwrap();
-    let mut  new_items =new_items.lock().unwrap();
+    let kword =  kword.lock().ignore_poison();
+    let mut  new_items =new_items.lock().ignore_poison();
  
  // Bing Scraping
 
@@ -25,8 +40,8 @@ use serde_json::Value;
                      let value: Value = serde_json::from_str(&text).expect("! Problem reading bing response");
                      let items: Vec<String> = serde_json::from_value(value[1].to_owned()).expect("! Bing changed their JSON response");
                      items.into_iter().for_each(|item| {
-                         if ! output_vector.lock().expect("! Lock is already taken").contains(&item) {
-                             output_vector.lock().expect("! Lock is already taken").push(item.clone());
+                         if ! output_vector.lock().ignore_poison().contains(&item) {
+                             output_vector.lock().ignore_poison().push(item.clone());
                          }
                          if ! new_items.contains(&item) {
                              new_items.push(item);
@@ -50,8 +65,8 @@ use serde_json::Value;
 // ======================================================================================================================
 
  pub fn yep(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<String>>>,new_items:Arc<Mutex<Vec<String>>>){
-    let kword =  kword.lock().unwrap();
-    let mut  new_items =new_items.lock().unwrap();
+    let kword =  kword.lock().ignore_poison();
+    let mut  new_items =new_items.lock().ignore_poison();
 
     let yep_url: String = format!("https://api.yep.com/ac/?query={}", kword);
 
@@ -63,8 +78,8 @@ use serde_json::Value;
                              let value: Value = serde_json::from_str(&text).expect("! Problem reading yep response");
                              let items: Vec<String> = serde_json::from_value(value[1].to_owned()).expect("! yep changed their JSON response");
                              items.into_iter().for_each(|item| {
-                                 if ! output_vector.lock().expect("! Lock is already taken").contains(&item) {
-                                     output_vector.lock().expect("! Lock is already taken").push(item.clone());
+                                 if ! output_vector.lock().ignore_poison().contains(&item) {
+                                     output_vector.lock().ignore_poison().push(item.clone());
                                  }
                                  if ! new_items.contains(&item) {
                                      new_items.push(item);
@@ -98,8 +113,8 @@ use serde_json::Value;
 // ======================================================================================================================
 
 pub fn ask(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<String>>>,new_items:Arc<Mutex<Vec<String>>>){
-    let kword =  kword.lock().unwrap();
-    let mut  new_items =new_items.lock().unwrap();
+    let kword =  kword.lock().ignore_poison();
+    let mut  new_items =new_items.lock().ignore_poison();
 let ask_url: String = format!("https://amg-ss.ask.com/query?lang=en-US&limit=20&q={}", kword);
 
      match client.get(&ask_url).send() {
@@ -110,8 +125,8 @@ let ask_url: String = format!("https://amg-ss.ask.com/query?lang=en-US&limit=20&
                          let value: Value = serde_json::from_str(&text).expect("! Problem reading ask.com response");
                          let items: Vec<String> = serde_json::from_value(value[1].to_owned()).expect("! Ask.com changed their JSON response");
                          items.into_iter().for_each(|item| {
-                             if ! output_vector.lock().expect("! Lock is already taken").contains(&item) {
-                                 output_vector.lock().expect("! Lock is already taken").push(item.clone());
+                             if ! output_vector.lock().ignore_poison().contains(&item) {
+                                 output_vector.lock().ignore_poison().push(item.clone());
                              }
                              if ! new_items.contains(&item) {
                                  new_items.push(item);
@@ -142,8 +157,8 @@ let ask_url: String = format!("https://amg-ss.ask.com/query?lang=en-US&limit=20&
 
 
     pub fn neeva(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<String>>>,new_items:Arc<Mutex<Vec<String>>>){
-    let kword =  kword.lock().unwrap();
-    let mut  new_items =new_items.lock().unwrap();
+    let kword =  kword.lock().ignore_poison();
+    let mut  new_items =new_items.lock().ignore_poison();
      let neeva_url: String = format!("https://neeva.com/suggest?q={}", kword);
 
      match client.get(&neeva_url).send() {
@@ -154,8 +169,8 @@ let ask_url: String = format!("https://amg-ss.ask.com/query?lang=en-US&limit=20&
                          let value: Value = serde_json::from_str(&text).expect("! Problem reading neeva response");
                          let items: Vec<String> = serde_json::from_value(value[1].to_owned()).expect("! Neeva changed their JSON response");
                          items.into_iter().for_each(|item| {
-                             if ! output_vector.lock().expect("! Lock is already taken").contains(&item) {
-                                 output_vector.lock().expect("! Lock is already taken").push(item.clone());
+                             if ! output_vector.lock().ignore_poison().contains(&item) {
+                                 output_vector.lock().ignore_poison().push(item.clone());
                              }
                              if ! new_items.contains(&item) {
                                  new_items.push(item);
@@ -174,8 +189,8 @@ let ask_url: String = format!("https://amg-ss.ask.com/query?lang=en-US&limit=20&
 
 // ======================================================================================================================
 pub fn seznam(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<String>>>,new_items:Arc<Mutex<Vec<String>>>){
-    let kword =  kword.lock().unwrap();
-    let mut  new_items =new_items.lock().unwrap();
+    let kword =  kword.lock().ignore_poison();
+    let mut  new_items =new_items.lock().ignore_poison();
      let seznam_url: String = format!("https://suggest.seznam.cz/fulltext/cs?phrase={}&count=100", kword);
 
      match client.get(&seznam_url).send() {
@@ -191,8 +206,8 @@ pub fn seznam(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec
                          }).collect();
                          
                          items.into_iter().for_each(|item| {
-                             if ! output_vector.lock().expect("! Lock is already taken").contains(&item) {
-                                 output_vector.lock().expect("! Lock is already taken").push(item.clone());
+                             if ! output_vector.lock().ignore_poison().contains(&item) {
+                                 output_vector.lock().ignore_poison().push(item.clone());
                              }
                              if ! new_items.contains(&item) {
                                  new_items.push(item);
@@ -216,8 +231,8 @@ pub fn seznam(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec
 
 // ======================================================================================================================
 pub fn duckduckgo(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<String>>>,new_items:Arc<Mutex<Vec<String>>>){
-    let kword =  kword.lock().unwrap();
-    let mut  new_items =new_items.lock().unwrap();
+    let kword =  kword.lock().ignore_poison();
+    let mut  new_items =new_items.lock().ignore_poison();
 
          let duckduckgo_url: String = format!("https://duckduckgo.com/ac/?q={}", kword);
 
@@ -236,8 +251,8 @@ pub fn duckduckgo(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex
                              }).collect();
                              
                              items.into_iter().for_each(|item| {
-                                 if ! output_vector.lock().expect("! Lock is already taken").contains(&item) {
-                                     output_vector.lock().expect("! Lock is already taken").push(item.clone());
+                                 if ! output_vector.lock().ignore_poison().contains(&item) {
+                                     output_vector.lock().ignore_poison().push(item.clone());
                                  }
                                  if ! new_items.contains(&item) {
                                      new_items.push(item);
@@ -271,8 +286,8 @@ pub fn duckduckgo(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex
 
 
 pub fn yahoo(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<String>>>,new_items:Arc<Mutex<Vec<String>>>){
-    let kword =  kword.lock().unwrap();
-    let mut  new_items =new_items.lock().unwrap();
+    let kword =  kword.lock().ignore_poison();
+    let mut  new_items =new_items.lock().ignore_poison();
        // yahoo scraping
        let yahoo_url: String = format!("https://search.yahoo.com/sugg/gossip/gossip-us-fastbreak/?pq=&command={}&output=sd1&nresults=20", kword);
 
@@ -291,8 +306,8 @@ pub fn yahoo(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<
                            }).collect();
                            
                            items.into_iter().for_each(|item| {
-                               if ! output_vector.lock().expect("! Lock is already taken").contains(&item) {
-                                   output_vector.lock().expect("! Lock is already taken").push(item.clone());
+                               if ! output_vector.lock().ignore_poison().contains(&item) {
+                                   output_vector.lock().ignore_poison().push(item.clone());
                                }
                                if ! new_items.contains(&item) {
                                    new_items.push(item);
@@ -310,8 +325,8 @@ pub fn yahoo(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<
 }
 // ======================================================================================================================
 pub fn etsy(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<String>>>,new_items:Arc<Mutex<Vec<String>>>){
-    let kword =  kword.lock().unwrap();
-    let mut  new_items =new_items.lock().unwrap();
+    let kword =  kword.lock().ignore_poison();
+    let mut  new_items =new_items.lock().ignore_poison();
        
         // etsy scraping
         let etsy_url: String = format!("https://www.etsy.com/suggestions_ajax.php?search_query={}", kword);
@@ -331,8 +346,8 @@ pub fn etsy(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<S
                             }).collect();
                             
                             items.into_iter().for_each(|item| {
-                                if ! output_vector.lock().expect("! Lock is already taken").contains(&item) {
-                                    output_vector.lock().expect("! Lock is already taken").push(item.clone());
+                                if ! output_vector.lock().ignore_poison().contains(&item) {
+                                    output_vector.lock().ignore_poison().push(item.clone());
                                 }
                                 if ! new_items.contains(&item) {
                                     new_items.push(item);
@@ -355,8 +370,8 @@ pub fn etsy(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<S
 // ======================================================================================================================        
         // ebay scraping
 pub fn ebay(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<String>>>,new_items:Arc<Mutex<Vec<String>>>){
-    let kword =  kword.lock().unwrap();
-    let mut  new_items =new_items.lock().unwrap();
+    let kword =  kword.lock().ignore_poison();
+    let mut  new_items =new_items.lock().ignore_poison();
         let ebay_url: String = format!("https://www.ebay.com/autosug?kwd={}&sId=0&callback=0", kword);
 
         match client.get(&ebay_url).send() {
@@ -372,8 +387,8 @@ pub fn ebay(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<S
                            
                             
                             items.into_iter().for_each(|item| {
-                                if ! output_vector.lock().expect("! Lock is already taken").contains(&item) {
-                                    output_vector.lock().expect("! Lock is already taken").push(item.clone());
+                                if ! output_vector.lock().ignore_poison().contains(&item) {
+                                    output_vector.lock().ignore_poison().push(item.clone());
                                 }
                                 if ! new_items.contains(&item) {
                                     new_items.push(item);
@@ -393,8 +408,8 @@ pub fn ebay(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<S
 // ======================================================================================================================
      // yandex Scraping
  pub fn yandex(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<String>>>,new_items:Arc<Mutex<Vec<String>>>){
-    let kword =  kword.lock().unwrap();
-    let mut  new_items =new_items.lock().unwrap();
+    let kword =  kword.lock().ignore_poison();
+    let mut  new_items =new_items.lock().ignore_poison();
 
      let yandex_url: String = format!("https://yandex.com/suggest/suggest-ya.cgi?n=100&part={}", kword);
 
@@ -409,8 +424,8 @@ pub fn ebay(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<S
                         
                          
                          items.into_iter().for_each(|item| {
-                             if ! output_vector.lock().expect("! Lock is already taken").contains(&item) {
-                                 output_vector.lock().expect("! Lock is already taken").push(item.clone());
+                             if ! output_vector.lock().ignore_poison().contains(&item) {
+                                 output_vector.lock().ignore_poison().push(item.clone());
                              }
                              if ! new_items.contains(&item) {
                                  new_items.push(item);
@@ -431,8 +446,8 @@ pub fn ebay(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<S
 
 // ======================================================================================================================
 pub fn naver(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<String>>>,new_items:Arc<Mutex<Vec<String>>>){
-    let kword =  kword.lock().unwrap();
-    let mut  new_items =new_items.lock().unwrap();
+    let kword =  kword.lock().ignore_poison();
+    let mut  new_items =new_items.lock().ignore_poison();
     // naver Scraping
 
      let naver_url: String = format!("https://ac.search.naver.com/nx/ac?q={}&st=100", kword);
@@ -449,8 +464,8 @@ pub fn naver(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<
                          
                          items.into_iter().for_each(|item| {
                              let item = item[0].to_owned();
-                             if ! output_vector.lock().expect("! Lock is already taken").contains(&item) {
-                                 output_vector.lock().expect("! Lock is already taken").push(item.clone());
+                             if ! output_vector.lock().ignore_poison().contains(&item) {
+                                 output_vector.lock().ignore_poison().push(item.clone());
                              }
                              if ! new_items.contains(&item) {
                                  new_items.push(item);
@@ -468,8 +483,8 @@ pub fn naver(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<
 // ======================================================================================================================
 // ======================================================================================================================
 pub fn aol(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<String>>>,new_items:Arc<Mutex<Vec<String>>>){
-    let kword =  kword.lock().unwrap();
-    let mut  new_items =new_items.lock().unwrap();
+    let kword =  kword.lock().ignore_poison();
+    let mut  new_items =new_items.lock().ignore_poison();
        // aol scraping
        let aol_url: String = format!("https://search.aol.com/sugg/gossip/gossip-us-ura/?command={}&output=sd1", kword);
 
@@ -488,8 +503,8 @@ pub fn aol(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<St
                            }).collect();
                            
                            items.into_iter().for_each(|item| {
-                               if ! output_vector.lock().expect("! Lock is already taken").contains(&item) {
-                                   output_vector.lock().expect("! Lock is already taken").push(item.clone());
+                               if ! output_vector.lock().ignore_poison().contains(&item) {
+                                   output_vector.lock().ignore_poison().push(item.clone());
                                }
                                if ! new_items.contains(&item) {
                                    new_items.push(item);
@@ -512,8 +527,8 @@ pub fn aol(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<St
 
 // ======================================================================================================================
 pub fn amazon(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<String>>>,new_items:Arc<Mutex<Vec<String>>>){
-    let kword =  kword.lock().unwrap();
-    let mut  new_items =new_items.lock().unwrap();
+    let kword =  kword.lock().ignore_poison();
+    let mut  new_items =new_items.lock().ignore_poison();
 
        // amazon scraping
        let amazon_url: String = format!("https://completion.amazon.com/api/2017/suggestions?limit=11&prefix={}&alias=aps&mid=ATVPDKIKX0DER", kword);
@@ -533,8 +548,8 @@ pub fn amazon(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec
                            }).collect();
                            
                            items.into_iter().for_each(|item| {
-                               if ! output_vector.lock().expect("! Lock is already taken").contains(&item) {
-                                   output_vector.lock().expect("! Lock is already taken").push(item.clone());
+                               if ! output_vector.lock().ignore_poison().contains(&item) {
+                                   output_vector.lock().ignore_poison().push(item.clone());
                                }
                                if ! new_items.contains(&item) {
                                    new_items.push(item);
@@ -553,8 +568,8 @@ pub fn amazon(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec
 // ======================================================================================================================
 // ======================================================================================================================
 pub fn swisscows(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<String>>>,new_items:Arc<Mutex<Vec<String>>>){
-    let kword =  kword.lock().unwrap();
-    let mut  new_items =new_items.lock().unwrap();
+    let kword =  kword.lock().ignore_poison();
+    let mut  new_items =new_items.lock().ignore_poison();
 
        // swisscows scraping
        let swisscows_url: String = format!("https://swisscows.com/api/suggest?query={}&region=en-US&itemsCount=20", kword);
@@ -570,8 +585,8 @@ pub fn swisscows(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<
                            let items: Vec<String> = serde_json::from_value(value.to_owned()).expect("! swisscows changed their JSON response");
                            
                            items.into_iter().for_each(|item| {
-                               if ! output_vector.lock().expect("! Lock is already taken").contains(&item) {
-                                   output_vector.lock().expect("! Lock is already taken").push(item.clone());
+                               if ! output_vector.lock().ignore_poison().contains(&item) {
+                                   output_vector.lock().ignore_poison().push(item.clone());
                                }
                                if ! new_items.contains(&item) {
                                    new_items.push(item);
@@ -590,8 +605,8 @@ pub fn swisscows(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<
 // ======================================================================================================================
 // ======================================================================================================================
 pub fn ecosia(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<String>>>,new_items:Arc<Mutex<Vec<String>>>){
-    let kword =  kword.lock().unwrap();
-    let mut  new_items =new_items.lock().unwrap();
+    let kword =  kword.lock().ignore_poison();
+    let mut  new_items =new_items.lock().ignore_poison();
 
        // ecosia scraping
        let ecosia_url: String = format!("https://ac.ecosia.org/?q={}&mkt=en-us", kword);
@@ -608,8 +623,8 @@ pub fn ecosia(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec
                          
                            
                            items.into_iter().for_each(|item| {
-                               if ! output_vector.lock().expect("! Lock is already taken").contains(&item) {
-                                   output_vector.lock().expect("! Lock is already taken").push(item.clone());
+                               if ! output_vector.lock().ignore_poison().contains(&item) {
+                                   output_vector.lock().ignore_poison().push(item.clone());
                                }
                                if ! new_items.contains(&item) {
                                    new_items.push(item);
@@ -627,8 +642,8 @@ pub fn ecosia(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec
 // ======================================================================================================================
 // ======================================================================================================================
 pub fn wolframalpha(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<String>>>,new_items:Arc<Mutex<Vec<String>>>){
-    let kword =  kword.lock().unwrap();
-    let mut  new_items =new_items.lock().unwrap();
+    let kword =  kword.lock().ignore_poison();
+    let mut  new_items =new_items.lock().ignore_poison();
 
        // wolframalpha scraping only works if the word is very small. not work gaming work ga
        let wolframalpha_url: String = format!("https://www.wolframalpha.com/n/v1/api/autocomplete/?i={}", kword);
@@ -648,8 +663,8 @@ pub fn wolframalpha(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mut
                            }).collect();
                            
                            items.into_iter().for_each(|item| {
-                               if ! output_vector.lock().expect("! Lock is already taken").contains(&item) {
-                                   output_vector.lock().expect("! Lock is already taken").push(item.clone());
+                               if ! output_vector.lock().ignore_poison().contains(&item) {
+                                   output_vector.lock().ignore_poison().push(item.clone());
                                }
                                if ! new_items.contains(&item) {
                                    new_items.push(item);
@@ -669,8 +684,8 @@ pub fn wolframalpha(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mut
 
 // ======================================================================================================================
 pub fn qwant(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<String>>>,new_items:Arc<Mutex<Vec<String>>>){
-    let kword =  kword.lock().unwrap();
-    let mut  new_items =new_items.lock().unwrap();
+    let kword =  kword.lock().ignore_poison();
+    let mut  new_items =new_items.lock().ignore_poison();
        // qwant scraping
        let qwant_url: String = format!("https://api.qwant.com/v3/suggest?q={}", kword);
 
@@ -690,8 +705,8 @@ pub fn qwant(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<
                            }).collect();
                            
                            items.into_iter().for_each(|item| {
-                               if ! output_vector.lock().expect("! Lock is already taken").contains(&item) {
-                                   output_vector.lock().expect("! Lock is already taken").push(item.clone());
+                               if ! output_vector.lock().ignore_poison().contains(&item) {
+                                   output_vector.lock().ignore_poison().push(item.clone());
                                }
                                if ! new_items.contains(&item) {
                                    new_items.push(item);
@@ -709,8 +724,8 @@ pub fn qwant(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<
 // ======================================================================================================================
 // ======================================================================================================================
 pub fn you(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<String>>>,new_items:Arc<Mutex<Vec<String>>>){
-    let kword =  kword.lock().unwrap();
-    let mut  new_items =new_items.lock().unwrap();
+    let kword =  kword.lock().ignore_poison();
+    let mut  new_items =new_items.lock().ignore_poison();
        // you scraping 
        let you_url: String = format!("https://you.com/api/ac?q={}", kword);
 
@@ -727,8 +742,8 @@ pub fn you(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<St
                          
                            
                            items.into_iter().for_each(|item| {
-                               if ! output_vector.lock().expect("! Lock is already taken").contains(&item) {
-                                   output_vector.lock().expect("! Lock is already taken").push(item.clone());
+                               if ! output_vector.lock().ignore_poison().contains(&item) {
+                                   output_vector.lock().ignore_poison().push(item.clone());
                                }
                                if ! new_items.contains(&item) {
                                    new_items.push(item);

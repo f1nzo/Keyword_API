@@ -1,6 +1,6 @@
 // Imports
 mod engines;
-use std::sync::{Arc,Mutex};
+use std::sync::{Arc,Mutex,LockResult};
 use std::{thread, time};
 use rand::rngs::StdRng;
 use reqwest;
@@ -16,13 +16,29 @@ use log::{debug, error, info, warn};
 use env_logger;
 
 // Proxy List
-const MAX_THREADS:u8 = 10;
+const MAX_THREADS:u8 = 30;
 #[macro_use] extern crate lazy_static;
 
 lazy_static!{
     static ref PROXY_LIST: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(vec![]));
     static ref THREAD_COUNT: Arc<Mutex<u8>> = Arc::new(Mutex::new(0));
 
+}
+pub trait LockResultExt {
+    type Guard;
+
+    /// Returns the lock guard even if the mutex is [poisoned].
+    ///
+    /// [poisoned]: https://doc.rust-lang.org/stable/std/sync/struct.Mutex.html#poisoning
+    fn ignore_poison(self) -> Self::Guard;
+}
+
+impl<Guard> LockResultExt for LockResult<Guard> {
+    type Guard = Guard;
+
+    fn ignore_poison(self) -> Guard {
+        self.unwrap_or_else(|e| e.into_inner())
+    }
 }
 
 // Rocket.rs
@@ -72,30 +88,30 @@ async fn gen(word: String, max: usize) -> String {
 
     loop {
         old_items.clear();
-        for item in &(*new_items.lock().unwrap()) {
+        for item in &(*new_items.lock().ignore_poison()) {
             old_items.push(item.to_string());
         }
 
-        new_items.lock().unwrap().clear();
+        new_items.lock().ignore_poison().clear();
 
 
         for kword in &old_items {
 
-            if output_vector.lock().expect("! Lock is already taken").len() >= max {
+            if output_vector.lock().ignore_poison().len() >= max {
                 break;
             }
 
             // Setup reqwest client
 
             let mut rng: StdRng = SeedableRng::from_entropy();
-            let proxy_list_len = PROXY_LIST.lock().expect("! Lock is already taken").len();
+            let proxy_list_len = PROXY_LIST.lock().ignore_poison().len();
             let random_range = rng.gen_range(0..proxy_list_len);
-            let proxy: Proxy = reqwest::Proxy::http(&*PROXY_LIST.lock().expect("! Lock is already taken")[random_range]).unwrap();
+            let proxy: Proxy = reqwest::Proxy::http(&*PROXY_LIST.lock().ignore_poison()[random_range]).unwrap();
             
             
 
             for  engine  in engines::ENGINES.clone(){
-                if output_vector.lock().expect("! Lock is already taken").len() >= max {
+                if output_vector.lock().ignore_poison().len() >= max {
                     break;
                 }
 
@@ -106,12 +122,12 @@ async fn gen(word: String, max: usize) -> String {
                 let output_vector  = output_vector.clone();
                 let new_items = new_items.clone();
                 let proxy = proxy.clone();
-                while *THREAD_COUNT.lock().unwrap() >= MAX_THREADS{
+                while *THREAD_COUNT.lock().ignore_poison() >= MAX_THREADS{
                     // wait thread to free
                 }
                 thread::spawn(move||{
-                    *THREAD_COUNT.lock().unwrap()+=1;
-                    println!("new thread opened currently runing  {}",*THREAD_COUNT.lock().unwrap());
+                    *THREAD_COUNT.lock().ignore_poison()+=1;
+                    println!("new thread opened currently runing  {}",*THREAD_COUNT.lock().ignore_poison());
                    
 
                    
@@ -122,10 +138,10 @@ async fn gen(word: String, max: usize) -> String {
                     .build()
                     .expect("! could not build");
                     
-                    engine.lock().unwrap()(client,kword,output_vector,new_items);
-                    *THREAD_COUNT.lock().unwrap()-=1;
+                    engine.lock().ignore_poison()(client,kword,output_vector,new_items);
+                    *THREAD_COUNT.lock().ignore_poison()-=1;
                     
-                    println!("thread closed currently runing  {}",*THREAD_COUNT.lock().unwrap());
+                    println!("thread closed currently runing  {}",*THREAD_COUNT.lock().ignore_poison());
                 });
             }
 
@@ -133,16 +149,16 @@ async fn gen(word: String, max: usize) -> String {
 
         }
 
-        if output_vector.lock().expect("! Lock is already taken").len() >= max {
+        if output_vector.lock().ignore_poison().len() >= max {
             break;
         }
     }
 
-    output_vector.lock().expect("! Lock is already taken").truncate(max);
+    output_vector.lock().ignore_poison().truncate(max);
 
     let mut output_string = String::from("");
 
-    for item in output_vector.lock().expect("! Lock is already taken").iter() {
+    for item in output_vector.lock().ignore_poison().iter() {
         output_string = format!("{output_string}{item}\n")
     }
 
@@ -158,7 +174,7 @@ fn rocket() -> _ {
                     if response.status() == reqwest::StatusCode::OK {
                         match response.text() {
                             Ok(text) => {
-                                let mut guard = PROXY_LIST.lock().expect("! Lock is already taken");
+                                let mut guard = PROXY_LIST.lock().ignore_poison();
                                 *guard = text.split("\n").map(String::from).collect();
                             }
                             Err(_) => println!("! Could not read proxyscrape.com response json ")
