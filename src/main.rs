@@ -71,7 +71,6 @@ async fn gen(word: String, max: usize) -> String {
     let mut old_items: Vec<String> = vec![];
 
     loop {
-
         old_items.clear();
         for item in &(*new_items.lock().unwrap()) {
             old_items.push(item.to_string());
