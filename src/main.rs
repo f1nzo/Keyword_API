@@ -13,10 +13,11 @@ use rocket::http::Status;
 use randua;
 use rand::{Rng, SeedableRng};
 use log::{debug, error, info, warn};
+use std::result::Result;
 use env_logger;
 
 // Proxy List
-const MAX_THREADS:u8 = 30;
+const MAX_THREADS:u8 = 100;
 #[macro_use] extern crate lazy_static;
 
 lazy_static!{
@@ -106,11 +107,20 @@ async fn gen(word: String, max: usize) -> String {
             let mut rng: StdRng = SeedableRng::from_entropy();
             let proxy_list_len = PROXY_LIST.lock().ignore_poison().len();
             let random_range = rng.gen_range(0..proxy_list_len);
-            let proxy: Proxy = reqwest::Proxy::http(&*PROXY_LIST.lock().ignore_poison()[random_range]).unwrap();
+            let mut proxy: Result<Proxy,bool> = Err(true); // start with fake error.
             
+            while proxy.is_err(){ // assign new proxy if it gets an error
+                
+                proxy = match reqwest::Proxy::http(&*PROXY_LIST.lock().ignore_poison()[random_range]){
+                    Ok(x)=>Ok(x),
+                    Err(_)=>Err(true)
+                };
+            }
             
+           
 
             for  engine  in engines::ENGINES.clone(){
+                println!("found words --> {}",output_vector.lock().ignore_poison().len());
                 if output_vector.lock().ignore_poison().len() >= max {
                     break;
                 }
@@ -134,14 +144,18 @@ async fn gen(word: String, max: usize) -> String {
                    
                     let client:Client = reqwest::blocking::Client::builder()
                     .user_agent(randua::new().to_string())
-                    .proxy(proxy)
+                    .proxy(proxy.unwrap())
+                    .timeout(std::time::Duration::from_secs(15)) // unlimited timeout is bad because bad proxy blocks thread forever.
                     .build()
                     .expect("! could not build");
                     
                     engine.lock().ignore_poison()(client,kword,output_vector,new_items);
                     *THREAD_COUNT.lock().ignore_poison()-=1;
-                    
                     println!("thread closed currently runing  {}",*THREAD_COUNT.lock().ignore_poison());
+                    std::panic::set_hook(Box::new(|_| { // if thread panics because of faulty engine still keep track of runing threads.
+                        *THREAD_COUNT.lock().ignore_poison()-=1;
+                        println!("thread closed currently runing  {}",*THREAD_COUNT.lock().ignore_poison());
+                    }));
                 });
             }
 

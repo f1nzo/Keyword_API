@@ -764,7 +764,6 @@ pub fn you(client:Client,kword:Arc<Mutex<String>>,output_vector:Arc<Mutex<Vec<St
 lazy_static!{
     pub static ref ENGINES:Vec<&'static(dyn Fn(Client,Arc<Mutex<String>>,Arc<Mutex<Vec<String>>>,Arc<Mutex<Vec<String>>>)+ Sync)> = vec![
                 &bing,
-                &bing,
                 &yep,
                 &ask,
                 &neeva,
